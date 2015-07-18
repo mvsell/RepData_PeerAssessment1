@@ -2,7 +2,7 @@
 # Title: "Assignment1 - Reproducible Data"
 author: "MVS"
 date: "June 13, 2015"
-output: html_document
+output: html_document  
 ===========================================
 
 ## What is the mean total number of steps taken per day.
@@ -15,6 +15,7 @@ library(zoo)
 library(timeDate)
 library(chron)
 library(ggplot2)
+library(knitr)
 
 # import the data csv
 activity<-read.csv("activity.csv",header=TRUE,sep=",")
@@ -43,12 +44,13 @@ text(0, 11, paste("Mean =", tsteps_mean, "\nMedian =",tsteps_median), pos = 4)
 actmean <- ddply(activity, "interval", summarise, steps_mean = mean(steps, na.rm=TRUE))
 
 # plot the timeseries
-plot(actmean$steps_mean, type="l", ylim=c(0,225), xlab="Interval", ylab="No. of Steps", main="Average number of steps taken, for all days, per 5-min interval")
-# plot the location of the max value
-points(which.max(actmean$steps_mean),max(actmean$steps_mean))
+plot(actmean$steps_mean, type="l", ylim=c(0,225), xlab="5-min Interval", ylab="No. of Steps", main="Average number of steps taken, for all days, per 5-min interval")
+# place a circle on the plot at the location of the max value
+maxloc <- which.max(actmean$steps_mean)
+points(maxloc, max(actmean$steps_mean))
 
 # add stats to the plot
-text(110, 210, paste("Interval", which.max(actmean$steps_mean), "has the largest number of steps, at", round(max(actmean$steps_mean),1)), pos = 3)        
+text(110, 210, paste("Interval", maxloc, "has the largest number of steps, at", round(max(actmean$steps_mean),1)), pos = 3)        
 ```
 
 ![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png) 
@@ -59,7 +61,6 @@ text(110, 210, paste("Interval", which.max(actmean$steps_mean), "has the largest
 ```r
 # Get the total number of NA's in the DF
 totalNA<- sum(is.na(activity$steps)) # or use summary(activity)
-#print(paste("The total number of missing values in the dataset is", totalNA)) 
 ```
 
 The total number of missing values in the dataset is 2304 
@@ -106,8 +107,12 @@ activity$DayType<-as.factor(activity$DayType)
 # use ddply to summarise the avg steps per interval, across day types
 actmean <- ddply(activity, c("interval","DayType"), summarise, steps_mean = mean(steps, na.rm=TRUE))
 
-# plot city facets showing the summed Emmissions per year - visual inspection for yearly change
-qplot(interval, steps_mean, data=actmean, geom='line', facets=DayType~.) # might be possible to incorporate the previous step into here.
+# plot facets for weekend and weekday no. of steps
+qplot(interval/5, steps_mean, data=actmean, geom='line', facets=DayType~., xlab="5-min Interval")
 ```
 
 ![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
+
+```r
+# might be possible to incorporate the previous step into here.
+```
